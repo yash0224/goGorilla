@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WebSocket Client</title>
+</head>
+<body>
+    <h1>WebSocket Client</h1>
+    <input type="text" id="inputNumbers" placeholder="Enter numbers (space-separated)">
+    <button onclick="sendMessage()">Send</button>
+    <p id="output"></p>
+
+    <script>
+        const socket = new WebSocket("ws://localhost:8080/ws");
+
+        socket.onopen = function () {
+            console.log("Connected to WebSocket server");
+        };
+
+        socket.onmessage = function (event) {
+            const response = JSON.parse(event.data);
+            document.getElementById("output").innerText = "Sorted Array: " + response.array.join(", ");
+            console.log("Received sorted array:", response.array);
+        };
+
+        socket.onerror = function (error) {
+            console.log("WebSocket Error:", error);
+        };
+
+        socket.onclose = function () {
+            console.log("Disconnected from WebSocket server");
+        };
+
+        function sendMessage() {
+            let input = document.getElementById("inputNumbers").value.trim();
+            if (!input) {
+                alert("Please enter numbers");
+                return;
+            }
+
+            let numbers = input.split(" ").map(num => parseInt(num, 10)).filter(num => !isNaN(num));
+
+            if (numbers.length === 0) {
+                alert("Invalid input! Please enter valid numbers.");
+                return;
+            }
+
+            const message = { array: numbers };
+            socket.send(JSON.stringify(message));
+            console.log("Sent:", message);
+        }
+    </script>
+</body>
+</html>
